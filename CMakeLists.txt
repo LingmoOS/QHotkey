@@ -67,7 +67,7 @@ else()
     endif()
 
     include_directories(${X11_INCLUDE_DIR})
-    target_sources(qhotkey PRIVATE QHotkey/qhotkey_x11.cpp)
+    target_sources(qhotkey PRIVATE QHotkey/qhotkey_linux.cpp)
 endif()
 
 include(GNUInstallDirs)
