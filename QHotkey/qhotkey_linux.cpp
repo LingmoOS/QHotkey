@@ -5,6 +5,7 @@
 #include <QAction>
 #include <QCoreApplication>
 #include <cmath>
+#include <kglobalaccel.h>
 #include <qcoreapplication.h>
 #include <qkeysequence.h>
 #include <qloggingcategory.h>
@@ -412,19 +413,6 @@ void QHotkeyPrivateLinux::setActionsInAccel(const Shortcuts& shortcuts)
 
         shortcutInfosByName.remove(shortcut.first);
     }
-
-    // We can forget the shortcuts that aren't around anymore
-    // while (!shortcutInfosByName.isEmpty()) {
-    //     const QString shortcutName = shortcutInfosByName.begin().key();
-    //     auto it = m_shortcuts.find(shortcutName);
-    //     if (it != m_shortcuts.end()) {
-    //         KGlobalAccel::self()->removeAllShortcuts(it->second.get());
-    //         m_shortcuts.erase(it);
-    //     }
-    //     shortcutInfosByName.erase(shortcutInfosByName.begin());
-    // }
-
-    // Q_ASSERT(static_cast<qsizetype>(m_shortcuts.size()) == shortcuts.size());
 }
 
 bool QHotkeyPrivateLinux::registerShortcut(QHotkey::NativeShortcut shortcut)
@@ -488,10 +476,18 @@ bool QHotkeyPrivateLinux::registerShortcut(QHotkey::NativeShortcut shortcut)
                 { "preferred_trigger", combination_description },
             }
         };
-        m_registerdShortcutMapping.insert({ getShorctIdentifier(combination_description), shortcut });
-        setActionsInAccel({ _converted_shortcut });
 
-        return true;
+        // Check if the required shortcut is available for us
+        bool is_available = KGlobalAccel::self()->isGlobalShortcutAvailable(keySequence);
+        if (is_available) {
+            m_registerdShortcutMapping.insert({ getShorctIdentifier(combination_description), shortcut });
+            setActionsInAccel({ _converted_shortcut });
+            return true;
+        } else {
+            // Raise error
+            error = "The shortcut " + combination_description + " is already in use by another application.";
+            return false;
+        }
     }
 
     return false;
