@@ -42,7 +42,7 @@ std::optional<QKeySequence> XdgShortcut::parse(const QString &shortcutString)
             static QRegularExpression rx(QStringLiteral("^([\\w\\d_]+).*$"));
             Q_ASSERT(rx.isValid());
             rx.setPatternOptions(QRegularExpression::UseUnicodePropertiesOption);
-            QRegularExpressionMatch match = rx.match(remaining);
+            QRegularExpressionMatch match = rx.matchView(remaining);
             Q_ASSERT(match.isValid());
 
             identifier = xkb_keysym_from_name(match.capturedView(1).toUtf8().constData(), XKB_KEYSYM_CASE_INSENSITIVE);
